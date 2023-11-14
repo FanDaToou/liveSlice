@@ -1,6 +1,8 @@
 package rtmp
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
 	"net"
 	"net/url"
@@ -319,12 +321,12 @@ func (v *VirWriter) SendPacket() error {
 
 			if p.IsVideo {
 				cs.TypeID = av.TAG_VIDEO
+			} else if p.IsMetadata {
+				cs.TypeID = av.TAG_SCRIPTDATAAMF0
+			} else if p.IsAudio {
+				cs.TypeID = av.TAG_AUDIO
 			} else {
-				if p.IsMetadata {
-					cs.TypeID = av.TAG_SCRIPTDATAAMF0
-				} else {
-					cs.TypeID = av.TAG_AUDIO
-				}
+				cs.TypeID = av.TAG_INDEX
 			}
 
 			v.SaveStatics(p.StreamID, uint64(cs.Length), p.IsVideo)
@@ -370,6 +372,7 @@ type VirReader struct {
 	av.RWBaser
 	demuxer    *flv.Demuxer
 	conn       StreamReadWriteCloser
+	index      uint64
 	ReadBWInfo StaticsBW
 }
 
@@ -398,7 +401,7 @@ func (v *VirReader) SaveStatics(streamid uint32, length uint64, isVideoFlag bool
 	} else if (nowInMS - v.ReadBWInfo.LastTimestamp) >= SAVE_STATICS_INTERVAL {
 		diffTimestamp := (nowInMS - v.ReadBWInfo.LastTimestamp) / 1000
 
-		//log.Printf("now=%d, last=%d, diff=%d", nowInMS, v.ReadBWInfo.LastTimestamp, diffTimestamp)
+		// log.Printf("now=%d, last=%d, diff=%d", nowInMS, v.ReadBWInfo.LastTimestamp, diffTimestamp)
 		v.ReadBWInfo.VideoSpeedInBytesperMS = (v.ReadBWInfo.VideoDatainBytes - v.ReadBWInfo.LastVideoDatainBytes) * 8 / uint64(diffTimestamp) / 1000
 		v.ReadBWInfo.AudioSpeedInBytesperMS = (v.ReadBWInfo.AudioDatainBytes - v.ReadBWInfo.LastAudioDatainBytes) * 8 / uint64(diffTimestamp) / 1000
 
@@ -440,6 +443,12 @@ func (v *VirReader) Read(p *av.Packet) (err error) {
 	v.SaveStatics(p.StreamID, uint64(len(p.Data)), p.IsVideo)
 	v.demuxer.DemuxH(p)
 	return err
+}
+
+func getIndex(data []byte) (i uint64) {
+	buffer := bytes.NewBuffer(data)
+	binary.Read(buffer, binary.BigEndian, &i)
+	return i
 }
 
 func (v *VirReader) Info() (ret av.Info) {

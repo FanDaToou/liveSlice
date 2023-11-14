@@ -90,8 +90,10 @@ func (writer *FLVWriter) Write(p *av.Packet) error {
 			if err != nil {
 				return err
 			}
-		} else {
+		} else if p.IsAudio {
 			typeID = av.TAG_AUDIO
+		} else {
+			typeID = av.TAG_INDEX
 		}
 	}
 	dataLen := len(p.Data)
