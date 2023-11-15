@@ -29,6 +29,7 @@ type Application struct {
 	Live       bool     `mapstructure:"live"`
 	Hls        bool     `mapstructure:"hls"`
 	Flv        bool     `mapstructure:"flv"`
+	Slice      bool     `mapstructure:"Slice"`
 	Api        bool     `mapstructure:"api"`
 	StaticPush []string `mapstructure:"static_push"`
 }
@@ -47,6 +48,7 @@ type ServerCfg struct {
 	RTMPNoAuth      bool         `mapstructure:"rtmp_noauth"`
 	RTMPAddr        string       `mapstructure:"rtmp_addr"`
 	HTTPFLVAddr     string       `mapstructure:"httpflv_addr"`
+	HTTPSliceAddr   string       `mapstructure:"httpslice_addr"`
 	HLSAddr         string       `mapstructure:"hls_addr"`
 	HLSKeepAfterEnd bool         `mapstructure:"hls_keep_after_end"`
 	APIAddr         string       `mapstructure:"api_addr"`
@@ -67,6 +69,7 @@ var defaultConf = ServerCfg{
 	RTMPNoAuth:      false,
 	RTMPAddr:        ":1935",
 	HTTPFLVAddr:     ":7001",
+	HTTPSliceAddr:   ":7003",
 	HLSAddr:         ":7002",
 	HLSKeepAfterEnd: false,
 	APIAddr:         ":8090",
@@ -79,6 +82,7 @@ var defaultConf = ServerCfg{
 		Live:       true,
 		Hls:        true,
 		Flv:        true,
+		Slice:      true,
 		Api:        true,
 		StaticPush: nil,
 	}},
@@ -123,6 +127,7 @@ func initDefault() {
 	pflag.String("rtmps_cert", "server.crt", "cert file path required for RTMPS")
 	pflag.String("rtmps_key", "server.key", "key file path required for RTMPS")
 	pflag.String("httpflv_addr", ":7001", "HTTP-FLV server listen address")
+	pflag.String("httpslice_addr", ":7003", "HTTP-Slice server listen address")
 	pflag.String("hls_addr", ":7002", "HLS server listen address")
 	pflag.String("api_addr", ":8090", "HTTP manage interface server listen address")
 	pflag.String("config_file", "livego.yaml", "configure filename")

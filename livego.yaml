@@ -26,4 +26,5 @@ server:
   live: true
   hls: true
   api: true
+  slice: true
   flv: true

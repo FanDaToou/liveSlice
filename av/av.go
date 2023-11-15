@@ -9,6 +9,7 @@ const (
 	TAG_AUDIO          = 8
 	TAG_VIDEO          = 9
 	TAG_SCRIPTDATAAMF0 = 18
+	TAG_INDEX          = 14
 	TAG_SCRIPTDATAAMF3 = 0xf
 )
 
@@ -63,8 +64,11 @@ type Packet struct {
 	IsAudio    bool
 	IsVideo    bool
 	IsMetadata bool
+	IsIndex    bool
 	TimeStamp  uint32 // dts
 	StreamID   uint32
+	Index      uint64
+	SubIndex   uint64
 	Header     PacketHeader
 	Data       []byte
 }

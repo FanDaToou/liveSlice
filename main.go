@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	httpSlice "github.com/gwuhaolin/livego/protocol/httpslice"
 	"net"
 	"path"
 	"runtime"
@@ -109,6 +110,26 @@ func startHTTPFlv(stream *rtmp.RtmpStream) {
 	}()
 }
 
+func startHTTPSlice(stream *rtmp.RtmpStream) {
+	httpSliceAddr := configure.Config.GetString("httpslice_addr")
+
+	flvListen, err := net.Listen("tcp", httpSliceAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	hdlServer := httpSlice.NewServer(stream)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error("HTTP-FLV server panic: ", r)
+			}
+		}()
+		log.Info("HTTP-Slice listen On ", httpSliceAddr)
+		hdlServer.Serve(flvListen)
+	}()
+}
+
 func startAPI(stream *rtmp.RtmpStream) {
 	apiAddr := configure.Config.GetString("api_addr")
 	rtmpAddr := configure.Config.GetString("rtmp_addr")
@@ -168,6 +189,9 @@ func main() {
 		}
 		if app.Flv {
 			startHTTPFlv(stream)
+		}
+		if app.Slice {
+			startHTTPSlice(stream)
 		}
 		if app.Api {
 			startAPI(stream)

@@ -214,7 +214,9 @@ func (source *Source) parse(p *av.Packet) (int32, bool, error) {
 	var compositionTime int32
 	var ah av.AudioPacketHeader
 	var vh av.VideoPacketHeader
-	if p.IsVideo {
+	if p.IsIndex {
+		return compositionTime, false, nil
+	} else if p.IsVideo {
 		vh = p.Header.(av.VideoPacketHeader)
 		if vh.CodecID() != av.VIDEO_H264 {
 			return compositionTime, false, ErrNoSupportVideoCodec

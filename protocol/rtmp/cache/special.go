@@ -2,6 +2,7 @@ package cache
 
 import (
 	"bytes"
+	"sync"
 
 	"github.com/gwuhaolin/livego/av"
 	"github.com/gwuhaolin/livego/protocol/amf"
@@ -30,8 +31,16 @@ type SpecialCache struct {
 	p    *av.Packet
 }
 
+type SliceCache struct {
+	p []*av.Packet
+}
+
 func NewSpecialCache() *SpecialCache {
 	return &SpecialCache{}
+}
+
+func NewSliceCacheMap() *sync.Map {
+	return &sync.Map{}
 }
 
 func (specialCache *SpecialCache) Write(p *av.Packet) {
